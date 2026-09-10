@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WO Mic Recordings | Nghe Lại</title>
+  <meta name="description" content="Nghe lại âm thanh đã ghi từ WO Mic microphone" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">🎙️</div>
+      <div>
+        <div class="logo-text">MicW</div>
+        <div class="logo-sub">WO Mic Streaming</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" id="nav-live">🔴 Live Stream</a></li>
+      <li><a href="/recordings" class="active" id="nav-recordings">📼 Recordings</a></li>
+    </ul>
+    <div class="nav-status" id="navStatus">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Loading...</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Main Content -->
+<main>
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <h1>📼 Recordings</h1>
+      <p>Nghe lại các file âm thanh đã ghi từ WO Mic</p>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statTotalFiles">—</div>
+          <div class="stat-label">Total Files</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statTotalSize">—</div>
+          <div class="stat-label">Total Size</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statTotalDuration">—</div>
+          <div class="stat-label">Total Duration</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statSampleRate">—</div>
+          <div class="stat-label">Sample Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1; position:relative; min-width:200px;">
+          <input type="text" id="searchInput" placeholder="🔍  Tìm kiếm file..."
+            oninput="filterRecordings()"
+            style="width:100%; padding: 10px 16px; background: var(--bg-glass);
+                   border: 1px solid var(--border); border-radius: var(--radius-sm);
+                   color: var(--text-primary); font-family: var(--font-main);
+                   font-size: 0.9rem; outline: none; transition: border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--border-accent)'"
+            onblur="this.style.borderColor='var(--border)'"
+          />
+        </div>
+        <button class="btn btn-secondary" onclick="loadRecordings()">
+          🔄 Refresh
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="sortBy('date')" id="sortDate" style="border-color: var(--border-accent); color: var(--accent-teal);">
+          📅 Ngày
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="sortBy('size')" id="sortSize">
+          📦 Kích thước
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="sortBy('duration')" id="sortDuration">
+          ⏱ Thời lượng
+        </button>
+      </div>
+    </div>
+
+    <!-- Recordings List -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Danh sách file ghi âm</div>
+        <div id="fileCount" style="font-size: 0.8rem; color: var(--text-muted);"></div>
+      </div>
+
+      <div id="recordingsList">
+        <!-- Populated by JS -->
+        <div class="empty-state">
+          <div class="icon">⏳</div>
+          <h3>Đang tải...</h3>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 100px;"></div> <!-- Space for player bar -->
+
+  </div>
+</main>
+
+<!-- Fixed Audio Player Bar -->
+<div class="audio-player-bar" id="playerBar">
+  <div class="player-inner">
+    <div style="flex:1; min-width:0;">
+      <div class="player-title" id="playerTitle">No file selected</div>
+      <div class="player-sub" id="playerSub">—</div>
+    </div>
+    <audio id="audioPlayer" controls preload="none" style="flex:2; max-width: 500px;">
+      Your browser does not support the audio element.
+    </audio>
+    <button class="btn btn-secondary btn-sm" id="downloadBtn" onclick="downloadCurrent()">
+      ⬇ Download
+    </button>
+    <button class="btn btn-secondary btn-sm" onclick="closePlayer()">✕</button>
+  </div>
+</div>
+
+<script src="recordings.js"></script>
+</body>
+</html>
