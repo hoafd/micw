@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WO Mic Live Stream | Nghe Trực Tiếp</title>
+  <meta name="description" content="Nghe trực tiếp âm thanh từ điện thoại qua WO Mic - real-time audio streaming" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">🎙️</div>
+      <div>
+        <div class="logo-text">MicW</div>
+        <div class="logo-sub">WO Mic Streaming</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" class="active" id="nav-live">🔴 Live Stream</a></li>
+      <li><a href="/recordings" id="nav-recordings">📼 Recordings</a></li>
+    </ul>
+    <div class="nav-status" id="navStatus">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Đang kết nối...</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Main Content -->
+<main>
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="live-badge" id="liveBadge" style="display:none">
+        <span class="dot"></span> LIVE
+      </div>
+      <h1>🎙️ Live Audio Stream</h1>
+      <p>Nghe trực tiếp từ microphone điện thoại qua WO Mic</p>
+    </div>
+
+    <!-- Main Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; margin-bottom: 40px;">
+
+      <!-- Left: Waveform & Controls -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- Waveform Card -->
+        <div class="card accent-teal">
+          <div class="section-header">
+            <div class="section-title">Waveform</div>
+            <div id="latencyBadge" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+              — ms latency
+            </div>
+          </div>
+
+          <div class="waveform-container">
+            <canvas id="waveformCanvas"></canvas>
+            <div class="waveform-overlay" id="waveformOverlay">
+              🔌 Đang chờ kết nối WebSocket...
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px; gap: 16px; flex-wrap: wrap;">
+
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary" id="btnListen" onclick="toggleListen()">
+                <span id="btnListenIcon">▶</span>
+                <span id="btnListenText">Bắt đầu nghe</span>
+              </button>
+              <button class="btn btn-secondary" onclick="toggleMute()">
+                <span id="muteIcon">🔊</span>
+              </button>
+            </div>
+
+            <div class="volume-control" style="flex:1; max-width: 200px;">
+              <span style="font-size:0.9rem;">🔉</span>
+              <input type="range" id="volumeSlider" min="0" max="100" value="80"
+                     oninput="setVolume(this.value)" style="flex:1;" />
+              <span style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono); width: 36px;" id="volumeDisplay">80%</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Spectrum Visualizer -->
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px;">Spectrum Analyzer</div>
+          <div class="waveform-container">
+            <canvas id="spectrumCanvas" style="height: 100px;"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Status & Info -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- Connection Status -->
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px;">Connection</div>
+          <div id="connectionDetails" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">WebSocket</span>
+              <span id="wsStatus" style="font-family:var(--font-mono); color: var(--color-disconnected);">Offline</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">Mic Device</span>
+              <span id="micStatus" style="font-family:var(--font-mono); color: var(--text-muted);">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">Sample Rate</span>
+              <span id="sampleRateInfo" style="font-family:var(--font-mono); color: var(--text-muted);">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">Format</span>
+              <span id="formatInfo" style="font-family:var(--font-mono); color: var(--text-muted);">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Stats -->
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px;">Audio Stats</div>
+          <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="stat-item">
+              <div class="stat-value" id="statPeak">0</div>
+              <div class="stat-label">Peak dB</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statRMS">0</div>
+              <div class="stat-label">RMS dB</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statPackets">0</div>
+              <div class="stat-label">Packets</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="statKbps">0</div>
+              <div class="stat-label">KB/s</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card">
+          <div class="section-title" style="margin-bottom: 16px;">System</div>
+          <div id="systemStatus" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">Recording</span>
+              <span id="recStatus" style="font-family:var(--font-mono); color: var(--text-muted);">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+              <span style="color: var(--text-secondary);">WS Clients</span>
+              <span id="wsClients" style="font-family:var(--font-mono); color: var(--text-muted);">—</span>
+            </div>
+          </div>
+          <div style="margin-top: 16px;">
+            <a href="/recordings" class="btn btn-secondary" style="width:100%; justify-content:center; font-size:0.85rem;">
+              📼 Xem Recordings
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="live.js"></script>
+</body>
+</html>

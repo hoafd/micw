@@ -1,0 +1,49 @@
+# =============================================================================
+# WO Mic Recording & Streaming System - Configuration
+# =============================================================================
+
+# --- WO Mic Audio Device ---
+audio:
+  # Device index của WO Mic (tìm bằng list_devices.py)
+  # Dùng index 9 (WO Mic Device, 48kHz) hoặc 15 (WO Mic Wave, 48kHz)
+  device_index: 9
+  # Tên device để tìm tự động (nếu device_index = -1)
+  device_name: "WO Mic"
+  # Thông số audio
+  sample_rate: 48000       # Hz
+  channels: 1              # Mono
+  bit_depth: 16            # bits per sample (pyaudio.paInt16)
+  chunk_size: 1024         # Số frames mỗi lần đọc
+
+# --- Ghi Âm (Recording) ---
+recording:
+  enabled: true
+  # Thư mục lưu file ghi âm (relative to project root)
+  output_dir: "recordings"
+  # Thời gian mỗi segment file (phút). 0 = không chia segment
+  segment_minutes: 10
+  # Định dạng tên file: {datetime}_{index}.wav
+  filename_prefix: "rec"
+  # Giữ tối đa N file gần nhất (0 = không giới hạn)
+  max_files: 50
+
+# --- WebSocket Server (Real-time audio stream) ---
+websocket:
+  host: "0.0.0.0"
+  port: 8765
+  # Gửi audio mỗi N chunks (1 = mỗi chunk, 4 = gộp 4 chunks)
+  send_every_n_chunks: 2
+
+# --- Web Server (HTTP) ---
+web:
+  host: "0.0.0.0"
+  port: 5000
+  # Bật debug mode (False trong production)
+  debug: false
+
+# --- Logging ---
+logging:
+  level: "INFO"   # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/micw.log"
+  max_bytes: 10485760   # 10MB
+  backup_count: 3
